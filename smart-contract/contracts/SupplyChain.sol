@@ -23,7 +23,7 @@ contract SupplyChain is Ownable {
     mapping(uint => Item) private items;
     uint private itemCount;
 
-    constructor(address initialOwner) Ownable(initialOwner) {
+    constructor() {
         // Constructor of the SupplyChain contract
     }
 
