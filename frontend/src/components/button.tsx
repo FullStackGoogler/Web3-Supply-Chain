@@ -1,4 +1,3 @@
-
 interface PROPS {
     title: string
     textColor?: string

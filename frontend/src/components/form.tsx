@@ -9,7 +9,7 @@ import InputField from './InputField';
 import Button from './button';
 
 // Change the contract address to match your deployed contract address
-const contractAddress = "0xB68d4ef51F3fd2D56663e8FA33329D3ae494ea10";
+const contractAddress = "0x980a1165e1A176Eb96f9F3fa8B6b34C3881950Cc";
 
 function SupplyChain() {
   const [itemName, setItemName] = useState('');
@@ -98,9 +98,33 @@ function SupplyChain() {
     }
   };
 
+  const rejectItem = async (id: any) => {
+    try {
+      const tx = await supplyChainContract.rejectItem(id);
+      await tx.wait();
+
+      console.log('Item rejected successfully!');
+      loadItems();
+    } catch (error) {
+      console.error('Error rejecting item:', error);  
+    }
+  }
+
   const shipItem = async (id: any) => {
     try {
       const tx = await supplyChainContract.shipItem(id);
+      await tx.wait();
+
+      console.log('Item shipped successfully!');
+      loadItems();
+    } catch (error) {
+      console.error('Error shipping item:', error);
+    }
+  };
+
+  const sellItem = async (id: any) => {
+    try {
+      const tx = await supplyChainContract.sellItem(id);
       await tx.wait();
 
       console.log('Item shipped successfully!');
@@ -131,10 +155,14 @@ function SupplyChain() {
       case 0:
         return "Ordered";
       case 1:
-        return "Approved";
+        return "Pending Approval";
       case 2:
-        return "Delivered";
+        return "Approved";
       case 3:
+        return "Rejected";
+      case 4: 
+        return "Delivered";
+      case 5:
         return "Cancelled";
       default:
         return "";
@@ -152,7 +180,7 @@ function SupplyChain() {
   }
 
   const cols = [
-    "ID", "Name", "Status", "Ordered by", "Created by", "Approved by"
+    "ID", "Name", "Status", "Ordered by", "Created by", "Inspected by", "Shipped by"
   ];
 
   return (
@@ -163,7 +191,7 @@ function SupplyChain() {
             <InputField
               value={itemName}
               onchange={(e: string) => setItemName(e)}
-              placeholder="Type your item here ..."
+              placeholder="Order your item here ..."
             />
             <Button
               title="Order"
@@ -202,7 +230,8 @@ function SupplyChain() {
                 <div className='text-sm'>Status: {getStatusText(itemDetails.status)}</div>
                 <div className='text-sm'>Ordered By: {itemDetails.orderedBy}</div>
                 <div className='text-sm'>Created By: {itemDetails.createdBy}</div>
-                <div className='text-sm'>Approved By: {itemDetails.approvedBy}</div>
+                <div className='text-sm'>Approved By: {itemDetails.inspectedBy}</div>
+                <div className='text-sm'>Shipped By: {itemDetails.inspectedBy}</div>
               </div>
             )}
           </div>
@@ -254,16 +283,30 @@ function SupplyChain() {
                       </td>
                       <td className="px-6 py-2">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold ${item.status === 3
-                              ? 'text-red-600'
-                              : 'text-green-600'
-                            }`}
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+                            item.status === 0 || item.status === 2
+                              ? 'bg-green-50 text-green-600'
+                              : item.status === 1
+                              ? 'bg-yellow-50 text-yellow-600'
+                              : item.status === 3 || item.status === 5
+                              ? 'bg-red-50 text-red-600'
+                              : item.status === 4
+                              ? 'bg-blue-50 text-blue-600'
+                              : ''
+                          }`}
                         >
                           <span
-                            className={`h-1.5 w-1.5 rounded-full  ${item.status === 3
-                                ? 'bg-red-600'
-                                : 'bg-green-600'
-                              }`}
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              item.status === 0 || item.status === 2
+                              ? 'bg-green-600'
+                              : item.status === 1
+                              ? 'bg-yellow-600'
+                              : item.status === 3 || item.status === 5
+                              ? 'bg-red-600'
+                              : item.status === 4
+                              ? 'bg-blue-600'
+                              : ''
+                            }`}
                           />
                           {getStatusText(item.status)}
                         </span>
@@ -275,19 +318,29 @@ function SupplyChain() {
                         {displayPartialAddress(item.createdBy)}
                       </td>
                       <td className="px-6 py-2">
-                        {displayPartialAddress(item.approvedBy)}
+                        {displayPartialAddress(item.inspectedBy)}
+                      </td>
+                      <td className="px-6 py-2">
+                        {displayPartialAddress(item.inspectedBy)}
                       </td>
                       <td className="px-6 py-2 text-center">
-                        <div className="flex justify-end space-x-3 gap-4">
+                        <div className="flex justify-center space-x-3 gap-4">
                           {item.status === 0 && (
                             <>
-
                               <button className='text-red-600' onClick={() => cancelItem(item.id)}>Cancel</button>
                               <button className='text-green-600' onClick={() => shipItem(item.id)}>Create</button>
                             </>
                           )}
                           {item.status === 1 && (
-                            <button className='text-blue-600' onClick={() => approveItem(item.id)}>Ship Item</button>
+                            <>
+                              <button className='text-red-600' onClick={() => rejectItem(item.id)}>Reject Item</button>
+                              <button className='text-green-600' onClick={() => approveItem(item.id)}>Approve Item</button>
+                            </>
+                          )}
+                          {item.status === 2 && (
+                            <>
+                              <button className='text-blue-600' onClick={() => sellItem(item.id)}>Ship Item</button>
+                            </>
                           )}
                         </div>
                       </td>

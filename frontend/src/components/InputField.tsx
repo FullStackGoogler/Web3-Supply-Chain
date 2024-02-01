@@ -1,5 +1,3 @@
-
-
 interface PROPS {
   placeholder?: string
   value?: any

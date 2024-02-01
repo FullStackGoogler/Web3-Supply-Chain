@@ -14,6 +14,7 @@ contract SupplyChain is Ownable, AccessControl {
         Ordered,
         Shipped,
         Approved,
+        Rejected,
         Delivered,
         Cancelled
     }
@@ -25,7 +26,7 @@ contract SupplyChain is Ownable, AccessControl {
         Status status;
         address orderedBy; // Customer
         address createdBy; // Manufacturer
-        address approvedBy; // Vendor Inspection
+        address inspectedBy; // Vendor Inspection
     }
 
     mapping(uint => Item) private items;
@@ -74,7 +75,7 @@ contract SupplyChain is Ownable, AccessControl {
             "Item must be in Shipped state to be inspected"
         );
         items[_id].status = Status.Approved;
-        items[_id].approvedBy = msg.sender;
+        items[_id].inspectedBy = msg.sender;
     }
 
     function rejectItem(uint _id) public onlyVendor {
@@ -82,10 +83,11 @@ contract SupplyChain is Ownable, AccessControl {
             items[_id].status == Status.Shipped,
             "Item must be in Shipped state to be inspected"
         );
-        items[_id].status = Status.Cancelled; //Implement better option if time permits
+        items[_id].status = Status.Rejected;
+        items[_id].inspectedBy = msg.sender;
     }
 
-    function sellItem(uint _id) public onlyVendor {
+    function sellItem(uint _id) public onlyVendor { //Current implementation has sellItem sender be the same as approveItem/rejectItem, which is why "Inspected by" and "Shipped by" are the exact same atm
         require(
             items[_id].status == Status.Approved,
             "Item must be in Approved state to be sold"
@@ -101,8 +103,8 @@ contract SupplyChain is Ownable, AccessControl {
             name: _name,
             status: Status.Ordered,
             orderedBy: msg.sender,
-            createdBy: address(0),
-            approvedBy: address(0)
+            createdBy: address(0), //Same for inspector and seller in this implementation
+            inspectedBy: address(0)
         });
         items[itemCount] = newItem;
         itemCount++;

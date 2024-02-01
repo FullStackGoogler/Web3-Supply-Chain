@@ -264,7 +264,7 @@
 					},
 					{
 						"internalType": "address",
-						"name": "approvedBy",
+						"name": "inspectedBy",
 						"type": "address"
 					}
 				],
