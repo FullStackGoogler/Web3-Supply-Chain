@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import detectEthereumProvider from '@metamask/detect-provider';
 
-//ln -s ../../smart-contract/artifacts/contracts/SupplyChain.sol/SupplyChain.json node_modules/SupplyChain.json
 import SupplyChainABI from "./SupplyChain.json";
 
 import InputField from './InputField';
 import Button from './button';
 
-// Change the contract address to match your deployed contract address
+// Update this to match deployed smart contract address
 const contractAddress = "0x980a1165e1A176Eb96f9F3fa8B6b34C3881950Cc";
 
 function SupplyChain() {
@@ -17,6 +16,9 @@ function SupplyChain() {
   const [itemDetails, setItemDetails] = useState<any>(null);
   const [items, setItems] = useState<any>([]);
   const [loading, setLoading] = useState(false);
+
+  // Invalid Role Access Error Popup
+  const [roleError, setRoleError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeMetaMask = async () => {
@@ -71,6 +73,7 @@ function SupplyChain() {
       console.log('Item ordered successfully!');
       loadItems();
     } catch (error) {
+      setRoleError("Error: Caller does not have the Customer Role!");
       console.error('Error ordering item:', error);
     }
   };
@@ -82,6 +85,7 @@ function SupplyChain() {
       console.log('Item cancelled successfully!');
       loadItems();
     } catch (error) {
+      setRoleError("Error: Caller does not have the Customer Role!");
       console.error('Error cancelling item:', error);
     }
   };
@@ -94,6 +98,7 @@ function SupplyChain() {
       console.log('Item approved successfully!');
       loadItems();
     } catch (error) {
+      setRoleError("Error: Caller does not have the Vendor Role!");
       console.error('Error approving item:', error);  
     }
   };
@@ -106,6 +111,7 @@ function SupplyChain() {
       console.log('Item rejected successfully!');
       loadItems();
     } catch (error) {
+      setRoleError("Error: Caller does not have the Vendor Role!");
       console.error('Error rejecting item:', error);  
     }
   }
@@ -118,6 +124,7 @@ function SupplyChain() {
       console.log('Item shipped successfully!');
       loadItems();
     } catch (error) {
+      setRoleError("Error: Caller does not have the Manufacturer Role!");
       console.error('Error shipping item:', error);
     }
   };
@@ -130,6 +137,7 @@ function SupplyChain() {
       console.log('Item shipped successfully!');
       loadItems();
     } catch (error) {
+      setRoleError("Error: Caller does not have the Vendor Role!");
       console.error('Error shipping item:', error);
     }
   };
@@ -185,6 +193,31 @@ function SupplyChain() {
 
   return (
     <>
+      {roleError && (
+        <div className="relative bg-red-500 text-white p-4 font-bold">
+          {roleError}
+          <button
+            className="absolute top-1/2 right-0 transform -translate-y-1/2 px-2 py-1 cursor-pointer"
+            onClick={() => setRoleError(null)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="h-8 w-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-lg border border-gray-200 shadow-md m-5" data-aos="fade-up" data-aos-offset="300" data-aos-easing="ease-in-sine">
         <div className="m-10 flex justify-between space-x-5">
           <div className="w-full md:w-1/2 flex justify-between items-center space-x-3">
