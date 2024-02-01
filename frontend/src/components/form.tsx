@@ -9,7 +9,7 @@ import InputField from './InputField';
 import Button from './button';
 
 // Change the contract address to match your deployed contract address
-const contractAddress = "0x5A6f458D27A0C020c8952825AF8e5Ed80D151fa2";
+const contractAddress = "0xB68d4ef51F3fd2D56663e8FA33329D3ae494ea10";
 
 function SupplyChain() {
   const [itemName, setItemName] = useState('');
@@ -94,7 +94,7 @@ function SupplyChain() {
       console.log('Item approved successfully!');
       loadItems();
     } catch (error) {
-      console.error('Error approving item:', error);
+      console.error('Error approving item:', error);  
     }
   };
 
@@ -109,6 +109,8 @@ function SupplyChain() {
       console.error('Error shipping item:', error);
     }
   };
+
+  //const sellItem = async (id: any) => {}
 
   const getItem = async () => {
     try {
@@ -143,14 +145,14 @@ function SupplyChain() {
     if (address.length <= 7) {
       return address;
     } else {
-      const firstThree = address.substring(0, 3);
+      const firstFive = address.substring(0, 5);
       const lastFour = address.substring(address.length - 4);
-      return `${firstThree}...${lastFour}`;
+      return `${firstFive}...${lastFour}`;
     }
   }
 
   const cols = [
-    "ID", "Name", "Status", "Ordered by", "Approved by", "Delivered to"
+    "ID", "Name", "Status", "Ordered by", "Created by", "Approved by"
   ];
 
   return (
@@ -199,8 +201,8 @@ function SupplyChain() {
                 <div className='text-sm'>Name: {itemDetails.name}</div>
                 <div className='text-sm'>Status: {getStatusText(itemDetails.status)}</div>
                 <div className='text-sm'>Ordered By: {itemDetails.orderedBy}</div>
+                <div className='text-sm'>Created By: {itemDetails.createdBy}</div>
                 <div className='text-sm'>Approved By: {itemDetails.approvedBy}</div>
-                <div className='text-sm'>Delivered To: {itemDetails.deliveredTo}</div>
               </div>
             )}
           </div>
@@ -270,10 +272,10 @@ function SupplyChain() {
                         {displayPartialAddress(item.orderedBy)}
                       </td>
                       <td className="px-6 py-2">
-                        {displayPartialAddress(item.approvedBy)}
+                        {displayPartialAddress(item.createdBy)}
                       </td>
                       <td className="px-6 py-2">
-                        {displayPartialAddress(item.deliveredTo)}
+                        {displayPartialAddress(item.approvedBy)}
                       </td>
                       <td className="px-6 py-2 text-center">
                         <div className="flex justify-end space-x-3 gap-4">
@@ -281,11 +283,11 @@ function SupplyChain() {
                             <>
 
                               <button className='text-red-600' onClick={() => cancelItem(item.id)}>Cancel</button>
-                              <button className='text-green-600' onClick={() => approveItem(item.id)}>Approve</button>
+                              <button className='text-green-600' onClick={() => shipItem(item.id)}>Create</button>
                             </>
                           )}
                           {item.status === 1 && (
-                            <button className='text-blue-600' onClick={() => shipItem(item.id)}>Ship Item</button>
+                            <button className='text-blue-600' onClick={() => approveItem(item.id)}>Ship Item</button>
                           )}
                         </div>
                       </td>
